@@ -1,5 +1,6 @@
 #include "stdint.h"
 #include "stdio.h"
+#include "stdlib.h"
 
 struct st1 {
     int64_t id;
@@ -13,11 +14,14 @@ typedef struct {
     char * name;
 } ST1DEF1;
 
-void print001(const struct st1);
-
 void print001(const struct st1 s)
 {
     printf("id:%lld^^^name:%s\n", s.id, s.name);
+}
+
+void print002(ST1DEF1 * s) 
+{
+    printf("id:%lld^^^name:%s\n", s->id, s->name);
 }
 
 int main(int num, char ** args) {
@@ -38,4 +42,10 @@ int main(int num, char ** args) {
         "abab",
     };
     print001(s03);
+
+    ST1DEF1 * s04;
+    s04 = (ST1DEF1*) malloc (sizeof(ST1DEF1*));
+    s04->id = 4;
+    s04->name = "cefg";
+    print002(s04);
 }
