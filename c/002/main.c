@@ -25,6 +25,4 @@ void test()
 
         curl_easy_cleanup(hd);
     }
-
-
 }
