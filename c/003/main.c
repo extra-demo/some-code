@@ -22,7 +22,7 @@ int main(int argc, char** argv)
         int age = UJNumericInt(oAge);
         double number = UJNumericFloat(oNumber);
 
-        wprintf(L"name:%ls, age:%d, number:%d", name, age, number);
+        wprintf(L"name:%ls, age:%ld, number:%lf", name, age, number);
 
         if (UJObjectUnpack(oAddress, 2, "SN", addressKeys, &oCity, &oPopulation) == 2)
         {
@@ -31,7 +31,7 @@ int main(int argc, char** argv)
             city = UJReadString(oCity, NULL);
             population = UJNumericLongLong(oPopulation);
 
-            wprintf(L" city:%ls, population:%d", city, population);
+            wprintf(L" city:%ls, population:%lld", city, population);
         }
     }
 
