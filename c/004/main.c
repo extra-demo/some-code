@@ -1,61 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <curl/curl.h>
-#include <wchar.h>
-#include <wctype.h>
+#include <string.h>
 #include "3rdparty/json/ujdecode.h"
-
-void test();
-
-int main(int argc, char **argv) {
-    test();
-    return 0;
-}
-
-struct WithThis {
-    size_t sizeLeft;
-    const wchar_t *read_ptr;
-};
-
-static size_t read_function_cb(void *dest, size_t size, size_t nmemb, void *user_ptr) {
-    struct WithThis *wt = (struct WithThis *) user_ptr;
-    size_t buffer_size = size * nmemb;
-
-    if (wt->sizeLeft) {
-        size_t copy_this_much = wt->sizeLeft;
-        if (copy_this_much > buffer_size) {
-            copy_this_much = buffer_size;
-        }
-        wmemcpy(dest, wt->read_ptr, copy_this_much);
-        wt->read_ptr +=copy_this_much;
-        wt->sizeLeft -= copy_this_much;
-        return copy_this_much;
-    }
-
-    return 0;
-}
-
-void test() {
-    CURL *hd = curl_easy_init();
-
-    if (hd) {
-        curl_easy_setopt(hd, CURLOPT_URL, "https://v2.jinrishici.com/one.json");
-
-        struct WithThis _this;
-        curl_easy_setopt(hd, CURLOPT_READFUNCTION, read_function_cb);
-        curl_easy_setopt(hd, CURLOPT_READDATA, &_this);
-        curl_easy_setopt(hd, CURLOPT_VERBOSE, 1L);
-
-        CURLcode ret = curl_easy_perform(hd);
-
-        if (ret != CURLE_OK) {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(ret));
-        }
-
-        wprintf(L"\n\n\nabab ==> %s", _this.read_ptr);
-
-        curl_easy_cleanup(hd);
-    }
-}
 
 struct JRC_ORIGIN {
     wchar_t *author;
@@ -76,10 +23,80 @@ struct JRC_DATA {
     wchar_t *cacheAt;
 };
 
-struct JRC001 {
+struct JRC {
     wchar_t *status;
     struct JRC_DATA *data;
     wchar_t *ipAddress;
     wchar_t *warning;
     wchar_t *token;
 };
+
+static void test();
+
+static void decode(const char *str, struct JRC *data);
+
+int main(int argc, char **argv) {
+    test();
+    return 0;
+}
+
+typedef struct {
+    size_t size;
+    char *buf;
+} _Buffer;
+
+
+static size_t write_cb(void *contents, size_t size, size_t nmemb, void *user_ptr) {
+    _Buffer *mem = (_Buffer *) user_ptr;
+
+    size_t buffer_size = size * nmemb;
+
+    char *tmp = realloc(mem->buf, mem->size + buffer_size);
+    if (!tmp) {
+        printf("申请内存失败\n");
+        return 0;
+    }
+
+    mem->buf = tmp;
+    memcpy(&(mem->buf[mem->size]), contents, buffer_size);
+    mem->size += buffer_size;
+
+    return buffer_size;
+}
+
+static void decode(const char *str, struct JRC *data) {
+    void *state;
+    size_t cbInput = sizeof(str) - 1;
+
+    UJObject obj = UJDecode(str, cbInput, NULL, &state);
+
+    char *keys[] = {"status", "data", "ipAddress", "warning", "token"};
+    UJObject oState, oData, oIpAddress, oWarning, oToken;
+
+    if (UJObjectUnpack(obj, 5, "SOSSS", &oState, &oIpAddress, &oWarning, &oToken)) {
+
+    }
+}
+
+static void test() {
+    CURL *hd = curl_easy_init();
+
+    if (hd) {
+        curl_easy_setopt(hd, CURLOPT_URL, "https://v2.jinrishici.com/one.json");
+
+        _Buffer _this;
+        curl_easy_setopt(hd, CURLOPT_WRITEFUNCTION, write_cb);
+        curl_easy_setopt(hd, CURLOPT_WRITEDATA, &_this);
+
+        CURLcode ret = curl_easy_perform(hd);
+
+        if (ret != CURLE_OK) {
+            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(ret));
+        }
+
+        wprintf(L"\n\n\nabab ==> %s", _this.buf);
+
+        curl_easy_cleanup(hd);
+    }
+}
+
