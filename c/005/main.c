@@ -71,7 +71,7 @@ static void decodeJson(const char *str, struct JRC *data) {
 
     UJObject obj = UJDecode(str, cbInput, NULL, &state);
 
-    const wchar_t *keys[] = {L"status", L"data", L"ipAddress
+    const wchar_t *keys[] = {L"status", L"data", L"ipAddress", L"warning", L"token"};
     UJObject oState, oData, oIpAddress, oWarning, oToken;
 
     printf("===> %d <===", UJGetType(obj));
@@ -96,10 +96,10 @@ static void requestData() {
         curl_easy_setopt(hd, CURLOPT_WRITEFUNCTION, write_cb);
         curl_easy_setopt(hd, CURLOPT_WRITEDATA, _this);
 
-        struct curl_slist *list = NULL;
-        list = curl_slist_append(list, "X-User-Token：XlKfjT4/eYOiehrAdEgwbipKIe6G9sbU");
+        // struct curl_slist *list = NULL;
+        // list = curl_slist_append(list, "X-User-Token：XlKfjT4/eYOiehrAdEgwbipKIe6G9sbU");
 
-        curl_easy_setopt(hd, CURLOPT_HTTPHEADER, list);
+        // curl_easy_setopt(hd, CURLOPT_HTTPHEADER, list);
 
 //        curl_easy_setopt(hd, CURLOPT_VERBOSE, 1);
 
