@@ -3,7 +3,7 @@
 #include <curl/curl.h>
 #include <string.h>
 #include <wchar.h>
-#include <wtypes.h>
+#include <wctype.h>
 #include "3rdparty/json/ujdecode.h"
 
 struct JRC_ORIGIN {
@@ -67,16 +67,20 @@ static size_t write_cb(void *contents, size_t size, size_t nmemb, void *user_ptr
 
 static void decodeJson(const char *str, struct JRC *data) {
     void *state;
-    size_t cbInput = sizeof(str) - 1;
+    size_t cbInput = strlen(str);
 
     UJObject obj = UJDecode(str, cbInput, NULL, &state);
 
-    const wchar_t *keys[] = {L"status", L"data", L"ipAddress", L"warning", L"token"};
+    const wchar_t *keys[] = {L"status", L"data", L"ipAddress
     UJObject oState, oData, oIpAddress, oWarning, oToken;
 
     printf("===> %d <===", UJGetType(obj));
     if (UJObjectUnpack(obj, 5, "SOSSS", keys, &oState, &oData, &oIpAddress, &oWarning, &oToken)) {
 
+        wprintf(
+                L"\n=====> stat: %ls <=====",
+                UJReadString(oIpAddress, NULL)
+        );
     }
 }
 
@@ -86,20 +90,28 @@ static void requestData() {
     if (hd) {
         curl_easy_setopt(hd, CURLOPT_URL, "https://v2.jinrishici.com/one.json");
 
-        _Buffer _this;
+        _Buffer *_this = malloc(sizeof(_Buffer));
+        _this->size = 0;
+        _this->buf = malloc(1);
         curl_easy_setopt(hd, CURLOPT_WRITEFUNCTION, write_cb);
-        curl_easy_setopt(hd, CURLOPT_WRITEDATA, &_this);
+        curl_easy_setopt(hd, CURLOPT_WRITEDATA, _this);
+
+        struct curl_slist *list = NULL;
+        list = curl_slist_append(list, "X-User-Token：XlKfjT4/eYOiehrAdEgwbipKIe6G9sbU");
+
+        curl_easy_setopt(hd, CURLOPT_HTTPHEADER, list);
+
 //        curl_easy_setopt(hd, CURLOPT_VERBOSE, 1);
 
         CURLcode ret = curl_easy_perform(hd);
-        printf("333 %d \n", ret);
+
         if (ret != CURLE_OK) {
             fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(ret));
         }
 
-        wprintf(L"\n\n\n abab ==> %hs \n", _this.buf);
+        wprintf(L"\n ret string ==> \n %hs \n", _this->buf);
         struct JRC jrc;
-        decodeJson(_this.buf, &jrc);
+        decodeJson(_this->buf, &jrc);
 
         curl_easy_cleanup(hd);
     }
