@@ -35,7 +35,9 @@ struct JRC {
 
 static void requestData();
 
-static void decodeJson(const char *str, struct JRC *data);
+static struct JRC decodeJson(const char *str, struct JRC *data);
+
+static wchar_t *getStrByType(UJObject obj);
 
 int main(int argc, char **argv) {
     requestData();
@@ -65,23 +67,81 @@ static size_t write_cb(void *contents, size_t size, size_t nmemb, void *user_ptr
     return buffer_size;
 }
 
-static void decodeJson(const char *str, struct JRC *data) {
+static struct JRC decodeJson(const char *str, struct JRC *data) {
     void *state;
     size_t cbInput = strlen(str);
 
+    struct JRC jrc;
+
     UJObject obj = UJDecode(str, cbInput, NULL, &state);
 
-    const wchar_t *keys[] = {L"status", L"data", L"ipAddress
+    const wchar_t *keys[] = {L"status", L"data", L"ipAddress", L"warning", L"token"};
     UJObject oState, oData, oIpAddress, oWarning, oToken;
 
-    printf("===> %d <===", UJGetType(obj));
-    if (UJObjectUnpack(obj, 5, "SOSSS", keys, &oState, &oData, &oIpAddress, &oWarning, &oToken)) {
+    if (UJObjectUnpack(obj, 5, "SOSsS", keys, &oState, &oData, &oIpAddress, &oWarning, &oToken)) {
+        UJObject o[] = {oState, oData, oIpAddress, oWarning, oToken};
+        for (int i = 0; i < 5; i++) {
+            wprintf(
+                    L"\n=====> %ls: %ls : %ls<=====\n",
+                    keys[i],
+                    UJReadString(o[i], NULL),
+                    getStrByType(o[i])
+            );
+        }
 
-        wprintf(
-                L"\n=====> stat: %ls <=====",
-                UJReadString(oIpAddress, NULL)
-        );
+        jrc.ipAddress = oIpAddress;
+        jrc.status = oState;
+        jrc.warning = oWarning;
+        jrc.token = oToken;
+
+        const wchar_t *dataKeys[] = {L"origin", L"content", L"id", L"matchTags", L"popularity", L"recommendedReson", L"cacheAt"};
+        UJObject oOrigin, oContent, oId, oMatchTags, oPopularity, oRecommendedReson, oCacheAt;
+        if (UJObjectUnpack(oData, 7, "OSSANSS", dataKeys, &oOrigin, &oContent, &oId, &oMatchTags, &oPopularity, &oRecommendedReson, &oCacheAt)) {
+            UJObject oo[] = {oOrigin, oContent, oId, oMatchTags, oPopularity, oRecommendedReson, oCacheAt};
+            for (int i = 0; i < 7; i++) {
+                wprintf(
+                        L"\n\n=====> %ls: %ls : %ls<=====\n",
+                        dataKeys[i],
+                        UJGetType(oo[i]) == UJT_String ? UJReadString(oo[i], NULL) : L"($)",
+                        getStrByType(oo[i])
+                );
+            }
+        }
+
+        jrc.data = oData;
     }
+
+    return jrc;
+}
+
+wchar_t *getStrByType(UJObject obj) {
+    enum UJTypes t[] = {UJT_Null,
+                        UJT_True,
+                        UJT_False,
+                        UJT_Long,
+                        UJT_LongLong,
+                        UJT_Double,
+                        UJT_String,
+                        UJT_Array,
+                        UJT_Object};
+    wchar_t *map[] = {L"NULL",
+                      L"True",
+                      L"False",
+                      L"Long",
+                      L"LongLong",
+                      L"Double",
+                      L"String",
+                      L"Array",
+                      L"Object"};
+
+    enum UJTypes type = UJGetType(obj);
+    for (ushort i = 0; i < 9; i++) {
+        if (type == t[i]) {
+            return map[i];
+        }
+    }
+
+    return L"-1";
 }
 
 static void requestData() {
