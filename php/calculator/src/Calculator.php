@@ -1,7 +1,8 @@
 <?php
+namespace Minbaby\Calculator;
 
 class Calculator {
-    protected function prefixNotation(array $data): int
+    public function prefixNotation(array $data): int
     {
       $stack = new \SplStack();
 
@@ -40,7 +41,7 @@ class Calculator {
       return intval($ret);
     }
 
-    protected function postfixNotation(array $data): int
+    public function postfixNotation(array $data): int
     {
         $stack = new \SplStack();
         foreach ($data as $index => $value) {
@@ -84,17 +85,4 @@ class Calculator {
                 new \Exception("不支持的运算符");
         }
     }
-
-    public function run($argc, $argv)
-    {
-        $prefixNotation = "* + 1 2 + 3 4";
-        echo "cal $prefixNotation", PHP_EOL;
-        echo "prefix notation ==> ", $this->prefixNotation(explode(' ', $prefixNotation)), PHP_EOL;
-
-        $postfixNotation = "1 2 + 3 4 + *";
-        echo "cal $postfixNotation", PHP_EOL;
-        echo "post notation ==> ", $this->postfixNotation(explode(' ', $postfixNotation)), PHP_EOL;
-    }
 }
-
-(new Calculator())->run($argc, $argv);

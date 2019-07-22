@@ -1,0 +1,22 @@
+{
+    "name": "minbaby/calculator",
+    "type": "project",
+    "require-dev": {
+        "kahlan/kahlan": "^4.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Minbaby\\Calculator\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "minbaby.zhang",
+            "email": "minbaby.zhang@gmail.com"
+        }
+    ]
+}
