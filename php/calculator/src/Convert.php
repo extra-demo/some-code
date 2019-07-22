@@ -42,36 +42,29 @@ class Convert {
             }
 
             if ($this->isOperator($v)) {
-                // || $optStack->top() == ')'
-                if ($optStack->isEmpty()) {
-                    $optStack->push($v);
-                    continue;
-                }
-                
-                if (!$this->less($v, $optStack->top())) {
-                    $optStack->push($v);
-                    continue;
-                } else {
-                    while (!$optStack->isEmpty()) {
-                        if (!$this->less($v, $optStack->top())) {
-                            break;
-                        }
-                        
-                        $numStack->push($optStack->pop());
+                while (true) {
+                    if ($optStack->isEmpty() || $optStack->top() === ')') {
+                        $optStack->push($v);
+                        break;
                     }
-                    $optStack->push($v);
+
+                    if (!$this->less($v, $optStack->top())) {
+                        $optStack->push($v);
+                        break;
+                    } 
+
+                    $numStack->push($optStack->pop());
                 }
 
                 continue;
             }
+
+            throw new \Exception("unknow value {$v}");
         }
 
         while(!$optStack->isEmpty()) {
             $numStack->push($optStack->pop());
         }
-
-        // __($optStack);
-        // __($numStack);
 
         return splSplDoublyLinkedListToArray($numStack);
     }
