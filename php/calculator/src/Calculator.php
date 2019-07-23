@@ -62,6 +62,12 @@ class Calculator {
 
         return (int) $stack->pop();
     }
+
+    public function infixNotation(array $data): int
+    {
+        throw new \Exception("TODO");
+        return 0;
+    }
     
     protected function __($data)
     {

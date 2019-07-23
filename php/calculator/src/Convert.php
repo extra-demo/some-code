@@ -1,6 +1,9 @@
 <?php
 namespace Minbaby\Calculator;
 
+use Minbaby\Calculator\Tree\Node;
+use Minbaby\Calculator\Tree\X;
+
 class Convert {
 
     const L0 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
@@ -120,6 +123,40 @@ class Convert {
         }
 
         return splSplDoublyLinkedListToArray($numStack);
+    }
+
+    /**
+     * @TODO 未完成
+     */
+    public function convertPrefixToInfix(array $prefixNotation): array
+    {
+        $node = null;
+        $stack = new \SplStack();
+        $prefixNotation = array_reverse($prefixNotation);
+        foreach ($prefixNotation as $v) {
+            if ($this->isNumberic($v)) {
+                $stack->push($v);
+            }
+
+            if ($this->isOperator($v)) {
+                $left = new Node(null, null, $stack->pop());
+
+                if (null != $node) {
+                    $right = $node;
+                } else {
+                    $right = new Node(null, null, $stack->pop());
+                }
+                $node = new Node($left, $right, $v);
+            }
+        }
+
+        (new X())->first($node);
+        __('');
+        (new X())->mid($node);
+        __('');
+        (new X())->end($node);
+
+        return [];
     }
 
     protected function isNumberic(string $value): bool

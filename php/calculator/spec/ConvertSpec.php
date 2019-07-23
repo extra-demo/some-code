@@ -32,7 +32,22 @@ describe("转换", function () {
 
         foreach($data as $k => $v) {
             it ("from:{$k} ==> to:{$v}", function () use ($k, $v) {
-                $result = (new Convert())-> converInfixToPrefix(explode(' ', $k));
+                $result = (new Convert())->converInfixToPrefix(explode(' ', $k));
+                $target = implode(' ', $result);
+                expect($v)->toBe($target);
+            });
+        }
+    });
+    
+    xcontext("前缀转中缀", function () {
+        $data = [
+            // "+ 1 * 4 3" => "1 + 4 * 3",
+            "* + 1 4 3" => "(1 + 4) * 3",
+        ];
+
+        foreach($data as $k => $v) {
+            it ("from:{$k} ==> to:{$v}", function () use ($k, $v) {
+                $result = (new Convert())->convertPrefixToInfix(explode(' ', $k));
                 $target = implode(' ', $result);
                 expect($v)->toBe($target);
             });
