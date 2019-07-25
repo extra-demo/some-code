@@ -1,0 +1,14 @@
+{
+    "name": "minbaby/svg",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "minbaby.zhang",
+            "email": "minbaby.zhang@gmail.com"
+        }
+    ],
+    "require": {
+        "meyfa/php-svg": "^0.9.0"
+    }
+}
