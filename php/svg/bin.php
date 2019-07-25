@@ -2,7 +2,6 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-
 $svg = new \SVG\SVG(600, 400);
 
 $data = [
@@ -25,6 +24,13 @@ foreach($data as $key => $value) {
         );
     $height += 50;
 }
+
+$rect = new \SVG\Nodes\Shapes\SVGRect(50, $height+50, 100, 100);
+$svg->getDocument()->addChild($rect);
+
+$ellipse = new \SVG\Nodes\Shapes\SVGEllipse(50, $height+50, 10, 10);
+$ellipse->setStyle('stroke', '#0f0');
+$svg->getDocument()->addChild($ellipse);
 
 
 
